@@ -16,6 +16,8 @@ module UserImpersonate
     # User model staff attribute
     config.user_is_staff_method = 'staff?'
 
+    config.user_can_impersonate_method = nil # current_user.can_impersonate?
+
     # Redirect to this path when entering impersonate mode
     config.redirect_on_impersonate = '/'
 

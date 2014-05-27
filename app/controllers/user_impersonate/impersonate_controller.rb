@@ -4,6 +4,8 @@ module UserImpersonate
   class ImpersonateController < ApplicationController
     before_filter :authenticate_the_user, except: ["destroy"]
     before_filter :current_user_must_be_staff!, except: ["destroy"]
+    before_filter :current_user_can_impersonate!, only: ["create"]
+
 
     # Display list of all users, except current (staff) user
     # Is this exclusion unnecessary complexity?
@@ -56,6 +58,15 @@ module UserImpersonate
       end
     end
 
+    def current_user_can_impersonate!
+      unless user_can_impersonate?(current_user, params[:user_id])
+        flash[:error] = "You don't have access to this section."
+        redirect_to :back
+      end
+    rescue ActionController::RedirectBackError
+      redirect_to '/'
+    end
+
     def current_user_must_be_staff!
       unless user_is_staff?(current_staff)
         flash[:error] = "You don't have access to this section."
@@ -102,6 +113,12 @@ module UserImpersonate
         current_staff.send(user_is_staff_method.to_sym)
     end
 
+    def user_can_impersonate?(user, impersonate_id)
+      return true if user_can_impersonate_method.nil?
+      current_user.respond_to?(user_can_impersonate_method.to_sym) &&
+        current_user.send(user_can_impersonate_method.to_sym, impersonate_id)
+    end
+
     def user_finder_method
       (config_or_default :user_finder, "find").to_sym
     end
@@ -128,6 +145,10 @@ module UserImpersonate
 
     def user_is_staff_method
       config_or_default :user_is_staff_method, "staff?"
+    end
+
+    def user_can_impersonate_method
+      config_or_default :user_can_impersonate_method, nil
     end
 
     def redirect_on_impersonate(impersonated_user)
