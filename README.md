@@ -10,6 +10,8 @@ This is a fork of Engine Yard's no-longer-maintained [`user_impersonate`](https:
 gem and is its official successor. It supports Rails 3.2.x and Rails 4 and has
 been tested against Ruby 1.9.3, 2.0.0 and 2.1.0.
 
+This fork also contains can_impersonate? functionality from [https://github.com/DaveSanders/user_impersonate](https://github.com/DaveSanders/user_impersonate)
+
 ## Overview
 
 `user_impersonate2` allows staff users to impersonate normal users: to see what
@@ -118,7 +120,7 @@ One way to add the `staff?` helper is to add a column to your `User` model:
 rails generate migration add_staff_to_users staff:boolean
 rake db:migrate db:test:prepare
 ```
-### User#can_impersonate?(user_id)
+### `User#can_impersonate?(user_id)`
 
 This method allows you to create logic to decide whether one user can impersonate another.  For example, you may have a customer service rep who can impersonate users, but not administrators.  This method will get passed the user_id that is to be impersonated, but the logic is up to you to decide.  For example:
 
