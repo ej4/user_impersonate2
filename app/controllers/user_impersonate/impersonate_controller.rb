@@ -25,11 +25,16 @@ module UserImpersonate
     end
 
     # Perform the user impersonate action
-    # GET /impersonate/user/123
+    # POST /impersonate/user/123
     def create
-      @user = find_user(params[:user_id])
-      impersonate(@user)
-      redirect_on_impersonate(@user)
+      if params[:user_id] == params[:current_user_id]
+        flash[:alert] = "You cannot impersonate yourself"
+        redirect_on_revert
+      else
+        @user = find_user(params[:user_id])
+        impersonate(@user)
+        redirect_on_impersonate(@user)
+      end
     end
 
     # Revert the user impersonation
