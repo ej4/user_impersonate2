@@ -27,6 +27,11 @@ module UserImpersonate
     # Perform the user impersonate action
     # POST /impersonate/user/123
     def create
+      unless session[:staff_user_id].nil?
+        flash[:alert] = "You cannot impersonate while impersonating"
+        redirect_on_revert and return
+      end
+
       if params[:user_id] == params[:current_user_id]
         flash[:alert] = "You cannot impersonate yourself"
         redirect_on_revert
