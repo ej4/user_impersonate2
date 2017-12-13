@@ -7,8 +7,8 @@
 ## Note
 
 This is a fork of Engine Yard's no-longer-maintained [`user_impersonate`](https://github.com/engineyard/user_impersonate)
-gem and is its official successor. It supports Rails 3.2.x and Rails 4 and has
-been tested against Ruby 1.9.3, 2.0.0 and 2.1.0.
+gem and is its official successor. It supports Rails from version 4.0 to Rails 5.1 (tests only exists for 4.0 though) and has
+been tested against Ruby 1.9.3, 2.0.0, 2.1.0, 2.2 and 2.3.1.
 
 This fork also contains can_impersonate? functionality from [https://github.com/DaveSanders/user_impersonate](https://github.com/DaveSanders/user_impersonate)
 
@@ -32,9 +32,7 @@ etc.)
 ## Example usage
 
 When you are impersonating a user you see what they see with a header section
-above:
-
-![](https://img.skitch.com/20120919-c8382rgdcub7gsh2p82k8reng3.png)
+above. By default, this will be red.
 
 ## Installation
 
@@ -140,10 +138,6 @@ Note that this method is optional.  If you don't want to limit who can impersona
 
 You can override the bright red header by creating a `app/views/user_impersonate/_header.html.erb`
 file (or whatever template system you like).
-
-For example, the Engine Yard Cloud uses a header that looks like:
-
-![](https://img.skitch.com/20120915-mk8mnpdsu5nuym3bxs678qf1a8.png)
 
 The `app/views/user_impersonate/_header.html.haml` HAML partial for this header
 would be:
@@ -306,7 +300,7 @@ To install all gem dependencies for the active version of Ruby and for a given
 gemfile, you'll need to run the `bundle` command, e.g.
 
 ```bash
-BUNDLE_GEMFILE=Gemfile.rails3 bundle
+BUNDLE_GEMFILE=Gemfile.rails4 bundle
 ```
 
 ### Running tests against all configurations (requires [rbenv](https://github.com/sstephenson/rbenv))
@@ -326,13 +320,7 @@ using the `bundle` command.
 ### Running tests against a single configuration
 
 To manually run the Travis-CI verification steps on your local machine, you can
-use the following sequence of commands for Rails 3.2.x:
-
-```bash
-script/test -g Gemfile.rails3
-```
-
-To test against Rails 4.0.x, use:
+use the following sequence of commands for Rails 4.0.x:
 
 ```bash
 script/test -g Gemfile.rails4

@@ -1,5 +1,10 @@
 #!/bin/bash
-SCRIPTPATH=$(readlink -f $0)
+if [[ "$OSTYPE" =~ ^darwin ]]; then
+  READLINK=greadlink
+else
+  READLINK=readlink
+fi
+SCRIPTPATH=$($READLINK -f $0)
 SCRIPTDIR=$(dirname $SCRIPTPATH)
 SCRIPTNAME=$(basename $SCRIPTPATH)
 APPDIR=$(dirname $SCRIPTDIR)
@@ -38,7 +43,7 @@ if [ "$GEMFILE" = '' ]; then
   show_usage
   exit 1
 fi
-GEMFILE=$(readlink -f $GEMFILE)
+GEMFILE=$(READLINK -f $GEMFILE)
 
 # Ensure gem dependencies are installed
 if [ $NOINSTALL -eq 0 ]; then
@@ -46,10 +51,10 @@ if [ $NOINSTALL -eq 0 ]; then
 fi
 
 # Reset database
-run_bundler exec rake db:reset
+RAILS_ENV=test run_bundler exec rake db:reset
 
 # Run Minitest and Cucumber tests passing any additional arguments
-run_bundler exec rake $@
+RAILS_ENV=test run_bundler exec rake $@
 
 # Build the gem
 run_bundler exec gem build user_impersonate2.gemspec

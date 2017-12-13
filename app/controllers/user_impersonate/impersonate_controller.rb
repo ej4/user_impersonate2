@@ -2,11 +2,12 @@ require_dependency "user_impersonate/application_controller"
 
 module UserImpersonate
   class ImpersonateController < ApplicationController
-    before_filter :authenticate_the_user, except: ["destroy"]
-    before_filter :current_user_must_be_staff!, except: ["destroy"]
-    before_filter :current_user_can_impersonate!, only: ["create"]
+    before_action :authenticate_the_user, except: ["destroy"]
+    before_action :current_user_must_be_staff!, except: ["destroy"]
+    before_action :current_user_can_impersonate!, only: ["create"]
 
 
+    helper_method :current_staff
     # Display list of all users, except current (staff) user
     # Is this exclusion unnecessary complexity?
     # Normal apps wouldn't bother with this action; rather they would
@@ -79,11 +80,8 @@ module UserImpersonate
 
     def current_user_must_be_staff!
       unless user_is_staff?(current_staff)
-        flash[:error] = "You don't have access to this section."
-        redirect_to :back
+        redirect_back(fallback_location: '/', error: "You don't have access to this section.")
       end
-    rescue ActionController::RedirectBackError
-      redirect_to '/'
     end
 
     # current_staff changes from a staff user to
@@ -97,8 +95,18 @@ module UserImpersonate
     # stored in +session[:staff_user_id]+
     def revert_impersonate
       return unless current_staff_user
+      sign_out_user current_user
       sign_in_user current_staff_user
       session[:staff_user_id] = nil
+    end
+
+    def sign_out_user(user)
+      # Only need to sign out if the staff class is different to the
+      # user being impersonated
+      if user_class_name != staff_class_name
+        method = config_or_default :sign_out_user_method, "sign_out"
+        self.send(method.to_sym, user)
+      end
     end
 
     def sign_in_user(user)
@@ -142,7 +150,7 @@ module UserImpersonate
     end
 
     def user_table
-      user_class_name.tableize.tr('/', '_')
+      user_class.table_name
     end
 
     def user_id_column
@@ -161,14 +169,18 @@ module UserImpersonate
       config_or_default :user_can_impersonate_method, nil
     end
 
+    def staff_class_name
+      config_or_default :staff_class, "User"
+    end
+
     def redirect_on_impersonate(impersonated_user)
       url = config_or_default :redirect_on_impersonate, root_url
       redirect_to url
     end
 
-    def redirect_on_revert(impersonated_user = nil)
+    def redirect_on_revert(impersonated_user = nil, redirect_params = params)
       url = config_or_default :redirect_on_revert, root_url
-      redirect_to url
+      redirect_to url, {}.merge(redirect_params.permit) # NOTE: not sure at this point what params does it need.
     end
 
     # gets overridden config value for engine, else returns default
